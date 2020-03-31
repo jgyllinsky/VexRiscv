@@ -32,7 +32,7 @@ bin/${VNAME}.bin : bin/${VNAME}.asc
 compile : bin/${VNAME}.bin
 
 time: bin/${VNAME}.bin
-	icetime -tmd hx8k bin/${VNAME}.asc
+	icetime -tmd lp8k bin/${VNAME}.asc
 
 prog : bin/${VNAME}.bin
 	tinyprog -p $^
