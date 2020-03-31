@@ -2,7 +2,7 @@
 
 Original GitHub site is https://github.com/SpinalHDL/VexRiscv .
 
-I have just run Murax SoC without XIP (eXecute-In-Place) on [TinyFPGA-BX](https://tinyfpga.com/bx/guide.html).
+I have just run Murax SoC _without_ XIP (eXecute-In-Place) on [TinyFPGA-BX](https://tinyfpga.com/bx/guide.html).
 
 ![photo](scripts/Murax/iCE40-tinyfpga-bx/img/photo.jpg)
 
@@ -33,10 +33,12 @@ Done.
 
 1. I used nextpnr though the original was using arachne-pnr.
 
-2. Pre-built firmware ```src/main/ressource/hex/muraxDemo.hex``` expects input clock is 12 MHz.
+2. Pre-built firmware ```src/main/ressource/hex/muraxDemo.hex``` expects input clock is 12 MHz.  FYI, the source code is located [here](https://github.com/SpinalHDL/VexRiscvSocSoftware/blob/master/projects/murax/demo/src/main.c).
 However, default clock for TinyFPGA-BX is 16 MHz.
 So LED blinking rate will be 16/12 (slightly higher than original).
 On the other hand, UART clock and bit-rate are okay because the input clock frequency information is given in SpinalHDL scala file (HDL).
+
+3. JTAG functionality is not tested (yet).
 
 ## Logic cells utilization
 
@@ -65,7 +67,7 @@ Total path delay: 23.27 ns (42.98 MHz)
 
 ![floor view](scripts/Murax/iCE40-tinyfpga-bx/img/floorview.png)
 
-**The following desctibes the original SpinalHDL/VexRiscv.**
+**The following describes the original SpinalHDL/VexRiscv.**
 
 ## Index
 
