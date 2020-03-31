@@ -54,6 +54,8 @@ Info: 	        ICESTORM_PLL:     0/    2     0%
 Info: 	         SB_WARMBOOT:     0/    1     0%
 ```
 
+Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
+
 ## Timing analysis
 
 ```bash
