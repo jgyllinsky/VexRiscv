@@ -31,14 +31,14 @@ Done.
 
 ## Notice
 
-1. I used nextpnr though the original was using arachne-pnr.
+- I used nextpnr though the original was using arachne-pnr.
 
-2. Pre-built firmware ```src/main/ressource/hex/muraxDemo.hex``` expects input clock is 12 MHz.  FYI, the source code is located [here](https://github.com/SpinalHDL/VexRiscvSocSoftware/blob/master/projects/murax/demo/src/main.c).
+- Pre-built firmware ```src/main/ressource/hex/muraxDemo.hex``` expects input clock is 12 MHz.  FYI, the source code is located [here](https://github.com/SpinalHDL/VexRiscvSocSoftware/blob/master/projects/murax/demo/src/main.c).
 However, default clock for TinyFPGA-BX is 16 MHz.
 So LED blinking rate will be 16/12 (slightly higher than original).
 On the other hand, UART clock and bit-rate are okay because the input clock frequency information is given in SpinalHDL scala file (HDL).
 
-3. JTAG functionality is not tested (yet).
+- JTAG functionality is not tested (yet).
 
 ## Logic cells utilization
 
