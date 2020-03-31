@@ -1,3 +1,72 @@
+## VexRiscv Murax (w/o XIP) port for TinyFPGA-BX
+
+Original GitHub site is https://github.com/SpinalHDL/VexRiscv .
+
+I have just run Murax SoC without XIP (eXecute-In-Place) on [TinyFPGA-BX](https://tinyfpga.com/bx/guide.html).
+
+![photo](scripts/Murax/iCE40-tinyfpga-bx/img/photo.jpg)
+
+To run it, first go through the original documentation below.
+
+- [Murax iCE40-hx8k_breakout_board_xip](https://github.com/SpinalHDL/VexRiscv/tree/master/scripts/Murax/iCE40-hx8k_breakout_board_xip)
+
+I'll explain only the difference for TinyFPGA-BX below.
+
+## Preparation
+
+1. Follow [this site](https://tinyfpga.com/bx/guide.html) and install tinyprog.
+
+2. Also follow [this site](https://github.com/SpinalHDL/VexRiscv) and install required software.
+
+## Build
+
+First, connect your TinyFPGA to a USB port.
+
+```bash
+$ cd scripts/Murax/iCE40-tinyfpga-bx
+$ make prog
+```
+
+Done.
+
+## Notice
+
+1. I used nextpnr though the original was using arachne-pnr.
+
+2. Pre-built firmware ```src/main/ressource/hex/muraxDemo.hex``` expects input clock is 12 MHz.
+However, default clock for TinyFPGA-BX is 16 MHz.
+So LED blinking rate will be 16/12 (slightly higher than original).
+On the other hand, UART clock and bit-rate are okay because the input clock frequency information is given in SpinalHDL scala file (HDL).
+
+## Logic cells utilization
+
+Output of nextpnr-ice40 (git sha1 dd7f7a5):
+
+```
+Info: Device utilisation:
+Info: 	         ICESTORM_LC:  2437/ 7680    31%
+Info: 	        ICESTORM_RAM:    22/   32    68%
+Info: 	               SB_IO:    16/  256     6%
+Info: 	               SB_GB:     8/    8   100%
+Info: 	        ICESTORM_PLL:     0/    2     0%
+Info: 	         SB_WARMBOOT:     0/    1     0%
+```
+
+## Timing analysis
+
+```bash
+$ icetime -tmd lp8k bin/Murax_iCE40_tinyfpga_bx.asc
+
+Total number of logic levels: 9
+Total path delay: 23.27 ns (42.98 MHz)
+```
+
+## Floor view
+
+![floor view](scripts/Murax/iCE40-tinyfpga-bx/img/floorview.png)
+
+**The following desctibes the original SpinalHDL/VexRiscv.**
+
 ## Index
 
 - [Index](#index)
