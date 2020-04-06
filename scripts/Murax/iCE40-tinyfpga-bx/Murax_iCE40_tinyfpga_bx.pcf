@@ -56,7 +56,7 @@ set_io --warn-no-port io_uart_rxd H2
 set_io --warn-no-port io_uart_txd H9
 set_io --warn-no-port PIN_15 D9
 set_io --warn-no-port PIN_16 D8
-set_io --warn-no-port PIN_17 C9
+set_io --warn-no-port io_pwm C9
 set_io --warn-no-port io_led[7] A9
 set_io --warn-no-port io_led[6] B8
 set_io --warn-no-port io_led[5] A8
