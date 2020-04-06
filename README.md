@@ -28,19 +28,23 @@ $ make prog
 ```
 
 Done.
+JTAG functionality also works.
+
+## Pin Assignments
+
+Please find this [PCF file](scripts/Murax/iCE40-tinyfpga-bx/Murax_iCE40_tinyfpga_bx.pcf).
+
+## Bonus
+
+I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala/vexriscv/yokoyama/PwmCtrl.scala).
+
+Demo software is located [here](https://github.com/yokoyama-flogics/VexRiscvSocSoftware/tree/tinyfpga_bx/projects/murax/yokoyama/src).
 
 ## Notice
 
 - I used nextpnr though the original was using arachne-pnr.
 
-- Pre-built firmware ```src/main/ressource/hex/muraxDemo.hex``` expects input clock is 12 MHz.  FYI, the source code is located [here](https://github.com/SpinalHDL/VexRiscvSocSoftware/blob/master/projects/murax/demo/src/main.c).
-However, default clock for TinyFPGA-BX is 16 MHz.
-So LED blinking rate will be 16/12 (slightly higher than original).
-On the other hand, UART clock and bit-rate are okay because the input clock frequency information is given in SpinalHDL scala file (HDL).
-
-- JTAG functionality is not tested (yet).
-
-## Logic cells utilization
+## Logic cells utilization (without PWM)
 
 Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
@@ -56,7 +60,7 @@ Info: 	         SB_WARMBOOT:     0/    1     0%
 
 Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
 
-## Timing analysis
+## Timing analysis (without PWM)
 
 ```bash
 $ icetime -tmd lp8k bin/Murax_iCE40_tinyfpga_bx.asc
@@ -65,7 +69,7 @@ Total number of logic levels: 9
 Total path delay: 23.27 ns (42.98 MHz)
 ```
 
-## Floor view
+## Floor view (without PWM)
 
 ![floor view](scripts/Murax/iCE40-tinyfpga-bx/img/floorview.png)
 
