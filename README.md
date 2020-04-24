@@ -36,15 +36,25 @@ Please find this [PCF file](scripts/Murax/iCE40-tinyfpga-bx/Murax_iCE40_tinyfpga
 
 ## Bonus
 
+### PWM Output
+
 I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala/vexriscv/yokoyama/PwmCtrl.scala).
 
 Demo software is located [here](https://github.com/yokoyama-flogics/VexRiscvSocSoftware/tree/tinyfpga_bx/projects/murax/yokoyama/src).
+
+### Simple SPI Slave
+
+Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexriscv/yokoyama/SpiSlave.scala).
+
+- without MISO
+- word size: 16 bits
+- SPI Mode: 1 (CPOL = 0, CPHA = 1)
 
 ## Notice
 
 - I used nextpnr though the original was using arachne-pnr.
 
-## Logic cells utilization (without PWM)
+## Logic cells utilization (without PWM, without SPI Slave)
 
 Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
@@ -60,7 +70,7 @@ Info: 	         SB_WARMBOOT:     0/    1     0%
 
 Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
 
-## Timing analysis (without PWM)
+## Timing analysis (without PWM, without SPI Slave)
 
 ```bash
 $ icetime -tmd lp8k bin/Murax_iCE40_tinyfpga_bx.asc
@@ -69,7 +79,7 @@ Total number of logic levels: 9
 Total path delay: 23.27 ns (42.98 MHz)
 ```
 
-## Floor view (without PWM)
+## Floor view (without PWM, without SPI Slave)
 
 ![floor view](scripts/Murax/iCE40-tinyfpga-bx/img/floorview.png)
 
