@@ -1,4 +1,4 @@
-package flogics.vexriscv.pwm
+package flogics.lib.pwm
 
 import spinal.core._
 import spinal.sim._

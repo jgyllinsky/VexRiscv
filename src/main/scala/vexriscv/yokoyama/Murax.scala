@@ -16,7 +16,8 @@ import vexriscv.{VexRiscv, VexRiscvConfig, plugin}
 import spinal.lib.com.spi.ddr._
 import spinal.lib.bus.simple._
 import scala.collection.mutable.ArrayBuffer
-import flogics.vexriscv.pwm._
+import flogics.lib.pwm._
+import flogics.lib.spi._
 import vexriscv.demo._
 
 /**
@@ -55,6 +56,7 @@ case class MyMurax(config : MuraxConfig) extends Component{
     val gpioA = master(TriStateArray(gpioWidth bits))
     val uart = master(Uart())
     val pwm = out Bool
+    val spi = slave(Spi())
 
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -180,6 +182,11 @@ case class MyMurax(config : MuraxConfig) extends Component{
     pwmCtrl.io.output <> io.pwm
     apbMapping += pwmCtrl.io.apb  -> (0x11000, 4 kB)
 
+    val spiCtrl = new Apb3SpiSlave(width = 16)
+    spiCtrl.io.spi <> io.spi
+    externalInterrupt setWhen(spiCtrl.io.interrupt)
+    apbMapping += spiCtrl.io.apb  -> (0x12000, 4 kB)
+
     val timer = new MuraxApb3Timer()
     timerInterrupt setWhen(timer.io.interrupt)
     apbMapping += timer.io.apb     -> (0x20000, 4 kB)
@@ -257,6 +264,9 @@ object Murax_iCE40_tinyfpga_bx{
       val uart_txd = out Bool()
       val uart_rxd = in  Bool()
       val pwm      = out Bool()
+      val spi_sck  = in  Bool()
+      val spi_mosi = in  Bool()
+      val spi_ss   = in  Bool()
       val USBPU    = out Bool()
 
 /*
@@ -274,7 +284,7 @@ object Murax_iCE40_tinyfpga_bx{
         .copy(
           coreFrequency = 16 MHz,
           onChipRamSize = 8 kB,
-          onChipRamHexFile = "src/main/ressource/hex/pwmDemo.hex"
+          onChipRamHexFile = "src/main/ressource/hex/pwmspiDemo.hex"
         )
     )
     murax.io.asyncReset := False
@@ -296,6 +306,9 @@ object Murax_iCE40_tinyfpga_bx{
     murax.io.uart.txd <> io.uart_txd
     murax.io.uart.rxd <> io.uart_rxd
     murax.io.pwm <> io.pwm
+    murax.io.spi.sck := io.spi_sck
+    murax.io.spi.mosi := io.spi_mosi
+    murax.io.spi.ss := io.spi_ss
 
     /*
      * Please refer

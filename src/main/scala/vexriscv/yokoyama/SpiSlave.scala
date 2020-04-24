@@ -3,6 +3,7 @@ package flogics.lib.spi
 import spinal.core._
 import spinal.lib._
 import spinal.lib.fsm._
+import spinal.lib.bus.amba3.apb.{Apb3, Apb3SlaveFactory}
 
 case class Spi() extends Bundle with IMasterSlave {
   val sck = Bool
@@ -129,6 +130,34 @@ class SpiSlave(
         }
       }
   }
+}
+
+class Apb3SpiSlave(width: Int, fifoDepth: Int = 8) extends Component {
+  val io = new Bundle {
+    val apb = slave(
+      Apb3(
+        addressWidth = 4,
+        dataWidth = 32
+      )
+    )
+    val spi = slave(Spi())
+    val interrupt = out Bool
+  }
+
+  val spislave = new SpiSlave(width)
+  io.spi <> spislave.io.spi
+  spislave.io.dummy_clk := False
+
+  val busCtrl = Apb3SlaveFactory(io.apb)
+  val q = spislave.io.output.toStream.queue(fifoDepth)
+  busCtrl.readStreamNonBlocking(
+    q,
+    address = 0,
+    validBitOffset = 31,
+    payloadBitOffset = 0
+  )
+  busCtrl.read(q.valid, address = 4, bitOffset = 0)
+  io.interrupt := q.valid
 }
 
 object SpiSlaveVerilog {
