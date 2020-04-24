@@ -50,6 +50,8 @@ Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexrisc
 - word size: 16 bits
 - SPI Mode: 1 (CPOL = 0, CPHA = 1)
 
+You can test this by [Python script](scripts/Murax/iCE40-tinyfpga-bx/scripts/spi_master.py).
+
 ## Notice
 
 - I used nextpnr though the original was using arachne-pnr.
