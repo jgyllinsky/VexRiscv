@@ -42,7 +42,7 @@ class SpiSlave(
    * Create reset input for spi_clock_domain.
    * Required to clear the internal registers when spi.ss is high when started.
    */
-  val ct_reset = Counter(reset_wait + 2)
+  val ct_reset = Counter(reset_wait)
   when(!ct_reset.willOverflowIfInc) {
     ct_reset.increment()
   }
@@ -69,7 +69,12 @@ class SpiSlave(
     ct_bits.increment()
 
     // ct_full won't be reset until next spi.sck edge comes
-    ct_full := ct_bits.willOverflow
+    val adjust: Int = 2
+    when(ct_bits.willOverflow) {
+      ct_full := True
+    } elsewhen(ct_bits.value >= width / 2 - adjust) {
+      ct_full := False
+    }
 
     val nextval = B(
       width bits,
@@ -97,8 +102,13 @@ class SpiSlave(
    *   https://spinalhdl.github.io/SpinalDoc-RTD/SpinalHDL/Structuring/clock_domain.html
    *   https://spinalhdl.github.io/SpinalDoc-RTD/SpinalHDL/Design%20errors/clock_crossing_violation.html
    */
-  val ct_full_cc = BufferCC(spi_clock_area.ct_full, False)
-  val output_cc = BufferCC(spi_clock_area.output, B(0, width bits))
+
+  /*
+   * spi_clock_area.ct_full may be latched earlier, so additional bufferDepth
+   * for ct_full_cc.
+   */
+  val ct_full_cc = BufferCC(spi_clock_area.ct_full, bufferDepth = 3)
+  val output_cc = BufferCC(spi_clock_area.output)
 
   val fsm = new StateMachine {
     val empty = new State with EntryPoint
@@ -193,6 +203,7 @@ object SpiSlaveSim {
       }
 
       def spi_mosi_send(v: Int) {
+        wait_sim()
         dut.io.spi.ss #= false
         wait_sim()
         for (bit <- 15 to 0 by -1) {
@@ -235,6 +246,9 @@ object SpiSlaveSim {
         if (dut.io.output.valid.toBoolean)
           assert(dut.io.output.payload.toBigInt == 0x5555, "0x5555")
       }
+
+      spi_mosi_send(0xaaaa)
+      spi_mosi_send(0x8888)
 
       wait_core(10)
     }
