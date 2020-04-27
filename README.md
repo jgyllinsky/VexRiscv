@@ -1,8 +1,12 @@
-## VexRiscv Murax (w/o XIP) port for TinyFPGA-BX
+## VexRiscv Murax (w/o XIP) and Mini-Briey ports for TinyFPGA-BX
 
 Original GitHub site is https://github.com/SpinalHDL/VexRiscv .
 
-I have just run Murax SoC _without_ XIP (eXecute-In-Place) on [TinyFPGA-BX](https://tinyfpga.com/bx/guide.html).
+I have just run Murax SoC _without_ XIP (eXecute-In-Place), and also Mini-Briey (a subset of the original Briey) on [TinyFPGA-BX](https://tinyfpga.com/bx/guide.html).
+
+Mini-Briey doesn't have SD-RAM interface (SdramCtrl) or VGA (VgaCtrl).
+And also CPU core configuration is as same as Murax.
+(In short, I wanted evaluate AXI4 Crossbar for future experimentation.)
 
 ![photo](scripts/Murax/iCE40-tinyfpga-bx/img/photo.jpg)
 
@@ -20,6 +24,8 @@ I'll explain only the difference for TinyFPGA-BX below.
 
 ## Build
 
+### Murax (w/o XIP)
+
 First, connect your TinyFPGA to a USB port.
 
 ```bash
@@ -30,11 +36,25 @@ $ make prog
 Done.
 JTAG functionality also works.
 
+### Mini-Briey
+
+First, connect your TinyFPGA to a USB port.
+
+```bash
+$ cd scripts/flogics/Briey/iCE40-tinyfpga-bx
+$ make prog
+```
+
+Done.
+JTAG functionality is not tested yet.
+
 ## Pin Assignments
 
 Please find this [PCF file](scripts/Murax/iCE40-tinyfpga-bx/Murax_iCE40_tinyfpga_bx.pcf).
 
 ## Bonus
+
+Currently only for Murax.
 
 ### PWM Output
 
@@ -56,7 +76,9 @@ You can test this by [Python script](scripts/Murax/iCE40-tinyfpga-bx/scripts/spi
 
 - I used nextpnr though the original was using arachne-pnr.
 
-## Logic cells utilization (without PWM, without SPI Slave)
+## Logic cells utilization
+
+### Murax (without PWM, without SPI Slave)
 
 Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
@@ -72,7 +94,9 @@ Info: 	         SB_WARMBOOT:     0/    1     0%
 
 Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
 
-## Timing analysis (without PWM, without SPI Slave)
+## Timing analysis
+
+### Murax (without PWM, without SPI Slave)
 
 ```bash
 $ icetime -tmd lp8k bin/Murax_iCE40_tinyfpga_bx.asc
@@ -81,7 +105,9 @@ Total number of logic levels: 9
 Total path delay: 23.27 ns (42.98 MHz)
 ```
 
-## Floor view (without PWM, without SPI Slave)
+## Floor view
+
+### Murax (without PWM, without SPI Slave)
 
 ![floor view](scripts/Murax/iCE40-tinyfpga-bx/img/floorview.png)
 
