@@ -8,11 +8,11 @@ Mini-Briey doesn't have SD-RAM interface (SdramCtrl) or VGA (VgaCtrl).
 And also CPU core configuration is as same as Murax.
 (In short, I wanted evaluate AXI4 Crossbar for future experimentation.)
 
-![photo](scripts/Murax/iCE40-tinyfpga-bx/img/photo.jpg)
+![photo](scripts/flogics/Murax/iCE40-tinyfpga-bx/img/photo.jpg)
 
 To run it, first go through the original documentation below.
 
-- [Murax iCE40-hx8k_breakout_board_xip](https://github.com/SpinalHDL/VexRiscv/tree/master/scripts/Murax/iCE40-hx8k_breakout_board_xip)
+- [Murax iCE40-hx8k_breakout_board_xip](https://github.com/SpinalHDL/VexRiscv/tree/master/scripts/flogics/Murax/iCE40-hx8k_breakout_board_xip)
 
 I'll explain only the difference for TinyFPGA-BX below.
 
@@ -29,7 +29,7 @@ I'll explain only the difference for TinyFPGA-BX below.
 First, connect your TinyFPGA to a USB port.
 
 ```bash
-$ cd scripts/Murax/iCE40-tinyfpga-bx
+$ cd scripts/flogics/Murax/iCE40-tinyfpga-bx
 $ make prog
 ```
 
@@ -46,11 +46,11 @@ $ make prog
 ```
 
 Done.
-JTAG functionality is not tested yet.
+JTAG functionality also works
 
 ## Pin Assignments
 
-Please find this [PCF file](scripts/Murax/iCE40-tinyfpga-bx/Murax_iCE40_tinyfpga_bx.pcf).
+Please find this [PCF file](scripts/flogics/Murax/iCE40-tinyfpga-bx/Murax_iCE40_tinyfpga_bx.pcf).
 
 ## Bonus
 
@@ -70,7 +70,7 @@ Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexrisc
 - word size: 16 bits
 - SPI Mode: 1 (CPOL = 0, CPHA = 1)
 
-You can test this by [Python script](scripts/Murax/iCE40-tinyfpga-bx/scripts/spi_master.py).
+You can test this by [Python script](scripts/flogics/Murax/iCE40-tinyfpga-bx/scripts/spi_master.py).
 
 ## Notice
 
@@ -109,7 +109,7 @@ Total path delay: 23.27 ns (42.98 MHz)
 
 ### Murax (without PWM, without SPI Slave)
 
-![floor view](scripts/Murax/iCE40-tinyfpga-bx/img/floorview.png)
+![floor view](scripts/flogics/Murax/iCE40-tinyfpga-bx/img/floorview.png)
 
 **The following describes the original SpinalHDL/VexRiscv.**
 

@@ -1,5 +1,5 @@
 
-VBASE = ../../..
+VBASE = ../../../..
 VNAME = Murax_iCE40_tinyfpga_bx
 VERILOG = ${VBASE}/${VNAME}.v
 
