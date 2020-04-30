@@ -161,7 +161,7 @@ object BrieyConfig{
 
   def flogics = {
     val config = BrieyConfig(
-      axiFrequency = 16 MHz,
+      axiFrequency = 0 MHz, // dummy anymore
       onChipRamSize  = 8 kB,
       sdramLayout = null,
       sdramTimings = null,
@@ -241,11 +241,17 @@ object BrieyConfig{
 
 
 
-class MiniBriey(config: BrieyConfig) extends Component{
+class MiniBriey(
+    config: BrieyConfig,
+    axiClkFreq: HertzNumber
+) extends Component{
 
   //Legacy constructor
   def this(axiFrequency: HertzNumber) {
-    this(BrieyConfig.default.copy(axiFrequency = axiFrequency))
+    this(
+      BrieyConfig.default.copy(axiFrequency = axiFrequency),
+      axiClkFreq = axiFrequency
+    )
   }
 
   import config._
@@ -277,7 +283,6 @@ class MiniBriey(config: BrieyConfig) extends Component{
 
   val resetCtrl = new ClockingArea(resetCtrlClockDomain) {
     val systemResetUnbuffered  = False
-//    val coreResetUnbuffered = False
 
     //Implement an counter to keep the reset axiResetOrder high 64 cycles
     // Also this counter will automaticly do a reset when the system boot.
@@ -298,13 +303,13 @@ class MiniBriey(config: BrieyConfig) extends Component{
   val axiClockDomain = ClockDomain(
     clock = io.axiClk,
     reset = resetCtrl.axiReset,
-    frequency = FixedFrequency(axiFrequency) //The frequency information is used by the SDRAM controller
+    frequency = FixedFrequency(axiClkFreq)
   )
 
   val debugClockDomain = ClockDomain(
     clock = io.axiClk,
     reset = resetCtrl.systemReset,
-    frequency = FixedFrequency(axiFrequency)
+    frequency = FixedFrequency(axiClkFreq)
   )
 
   val externalInterrupt = False
@@ -334,6 +339,7 @@ class MiniBriey(config: BrieyConfig) extends Component{
 
     val uartCtrl = Apb3UartCtrl(uartCtrlConfig)
     externalInterrupt setWhen(uartCtrl.io.interrupt)
+    SpinalInfo("clock = " + ClockDomain.current.frequency.getValue.toString)
 
     val pwmCtrl = new Apb3PwmCtrl(size = 8)
     pwmCtrl.io.output <> io.pwm
@@ -427,31 +433,7 @@ object Briey_iCE40_tinyfpga_bx{
     val GLOBAL_BUFFER_OUTPUT = out Bool()
   }
 
-  case class SB_IO_SCLK() extends BlackBox{
-    addGeneric("PIN_TYPE", B"010000")
-    val PACKAGE_PIN = out Bool()
-    val OUTPUT_CLK = in Bool()
-    val CLOCK_ENABLE = in Bool()
-    val D_OUT_0 = in Bool()
-    val D_OUT_1 = in Bool()
-    setDefinitionName("SB_IO")
-  }
-
-  case class SB_IO_DATA() extends BlackBox{
-    addGeneric("PIN_TYPE", B"110000")
-    val PACKAGE_PIN = inout(Analog(Bool))
-    val CLOCK_ENABLE = in Bool()
-    val INPUT_CLK = in Bool()
-    val OUTPUT_CLK = in Bool()
-    val OUTPUT_ENABLE = in Bool()
-    val D_OUT_0 = in Bool()
-    val D_OUT_1 = in Bool()
-    val D_IN_0 = out Bool()
-    val D_IN_1 = out Bool()
-    setDefinitionName("SB_IO")
-  }
-
-  case class Briey_iCE40_tinyfpga_bx() extends Component{
+  case class Briey_iCE40_tinyfpga_bx(nClkDiv: Int = 0) extends Component{
     val io = new Bundle {
       val mainClk  = in  Bool()
       val jtag_tck = in  Bool()
@@ -468,7 +450,8 @@ object Briey_iCE40_tinyfpga_bx{
       val led = out Bits(8 bits)
     }
     val briey = new MiniBriey(
-      BrieyConfig.flogics
+      BrieyConfig.flogics,
+      axiClkFreq = (16 / (1 << nClkDiv)) MHz
     )
     HexTools.initRam(
       briey.axi.ram.ram,
@@ -479,8 +462,27 @@ object Briey_iCE40_tinyfpga_bx{
 
     briey.io.asyncReset := False
 
+    val dividedClk = Bool
+    if (nClkDiv > 0) {
+      val clkDivDomain = ClockDomain(
+        clock = io.mainClk,
+        config = ClockDomainConfig(
+          resetKind = BOOT
+        )
+      )
+
+      val clkDivArea = new ClockingArea(clkDivDomain) {
+        val ct = Counter(nClkDiv bits)
+        ct.increment()
+        dividedClk := ct.willOverflow
+      }
+    }
+
     val mainClkBuffer = SB_GB()
-    mainClkBuffer.USER_SIGNAL_TO_GLOBAL_BUFFER <> io.mainClk
+    if (nClkDiv > 0)
+       mainClkBuffer.USER_SIGNAL_TO_GLOBAL_BUFFER <> dividedClk
+    else
+      mainClkBuffer.USER_SIGNAL_TO_GLOBAL_BUFFER <> io.mainClk
     mainClkBuffer.GLOBAL_BUFFER_OUTPUT <> briey.io.axiClk
 
     val jtagClkBuffer = SB_GB()
@@ -524,6 +526,6 @@ object Briey_iCE40_tinyfpga_bx{
   }
 
   def main(args: Array[String]) {
-    SpinalVerilog(Briey_iCE40_tinyfpga_bx())
+    SpinalVerilog(Briey_iCE40_tinyfpga_bx(nClkDiv = 0))
   }
 }
