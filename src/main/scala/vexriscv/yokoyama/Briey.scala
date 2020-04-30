@@ -472,7 +472,8 @@ object Briey_iCE40_tinyfpga_bx{
     )
     HexTools.initRam(
       briey.axi.ram.ram,
-      "src/main/ressource/hex/muraxDemo.hex",
+      "src/main/ressource/hex/pwmSpiDemo.hex",
+      // "../VexRiscvSocSoftware/projects/murax/yokoyama/build/demo.hex", // XXX
       0x80000000l
     )
 
