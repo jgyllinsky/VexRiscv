@@ -54,8 +54,6 @@ Please find this [PCF file](scripts/flogics/Murax/iCE40-tinyfpga-bx/Murax_iCE40_
 
 ## Bonus
 
-Currently only for Murax.
-
 ### PWM Output
 
 I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala/vexriscv/yokoyama/PwmCtrl.scala).
