@@ -19,6 +19,7 @@ import spinal.lib.memory.sdram.sdr.{Axi4SharedSdramCtrl, IS42x320D, SdramInterfa
 import spinal.lib.misc.HexTools
 import spinal.lib.soc.pinsec.{PinsecTimerCtrl, PinsecTimerCtrlExternal}
 import spinal.lib.system.debugger.{JtagAxi4SharedDebugger, JtagBridge, SystemDebugger, SystemDebuggerConfig}
+import spinal.lib.blackbox.lattice.ice40.SB_IO
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -445,7 +446,7 @@ object Briey_iCE40_tinyfpga_bx{
       val jtag_tdo = out Bool()
       val jtag_tms = in  Bool()
       val uart_txd = out Bool()
-      val uart_rxd = in  Bool()
+      val uart_rxd = in(Analog(Bool))
 /*
       val pwm      = out Bool()
       val spi_sck  = in  Bool()
@@ -489,7 +490,21 @@ object Briey_iCE40_tinyfpga_bx{
     briey.io.jtag.tms <> io.jtag_tms
     briey.io.gpioA.read <> 0
     briey.io.uart.txd <> io.uart_txd
-    briey.io.uart.rxd <> io.uart_rxd
+
+    class SB_IO_PULLUP(pinType: String) extends SB_IO(pinType) {
+      addGeneric("PULLUP", 1)
+    }
+
+    /*
+     * Pull-up of rxd is required to avoid UART "break" condition.
+     * Break condition will disable UART Rx and also Tx.
+     * Refer
+     * https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter#Break_condition
+     */
+    val rxdPullup = new SB_IO_PULLUP(pinType = "000001")
+    rxdPullup.PACKAGE_PIN := io.uart_rxd
+    briey.io.uart.rxd := rxdPullup.D_IN_0
+
 /*
     briey.io.pwm <> io.pwm
     briey.io.spi.sck := io.spi_sck
