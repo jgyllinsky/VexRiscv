@@ -213,6 +213,9 @@ object BrieyConfig{
           separatedAddSub = false,
           executeInsertion = false
         ),
+        // Caution: LightShifterPlugin or FullBarrelShifterPlugin are
+        //          mandatory.  If omitted, slli inst. works as add (adder).
+        new LightShifterPlugin,
         new HazardSimplePlugin(
           bypassExecute = false,
           bypassMemory = false,
