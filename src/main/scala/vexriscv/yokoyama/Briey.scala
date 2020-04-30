@@ -20,6 +20,8 @@ import spinal.lib.misc.HexTools
 import spinal.lib.soc.pinsec.{PinsecTimerCtrl, PinsecTimerCtrlExternal}
 import spinal.lib.system.debugger.{JtagAxi4SharedDebugger, JtagBridge, SystemDebugger, SystemDebuggerConfig}
 import spinal.lib.blackbox.lattice.ice40.SB_IO
+import flogics.lib.pwm._
+import flogics.lib.spi._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -257,11 +259,13 @@ class MiniBriey(config: BrieyConfig) extends Component{
     val axiClk     = in Bool
 
     //Main components IO
-    val jtag       = slave(Jtag())
+    val jtag = slave(Jtag())
 
     //Peripherals IO
-    val gpioA         = master(TriStateArray(32 bits))
-    val uart          = master(Uart())
+    val gpioA = master(TriStateArray(32 bits))
+    val uart  = master(Uart())
+    val pwm   = out Bool
+    val spi   = slave(Spi())
   }
 
   val resetCtrlClockDomain = ClockDomain(
@@ -331,6 +335,13 @@ class MiniBriey(config: BrieyConfig) extends Component{
     val uartCtrl = Apb3UartCtrl(uartCtrlConfig)
     externalInterrupt setWhen(uartCtrl.io.interrupt)
 
+    val pwmCtrl = new Apb3PwmCtrl(size = 8)
+    pwmCtrl.io.output <> io.pwm
+
+    val spiCtrl = new Apb3SpiSlave(width = 16)
+    spiCtrl.io.spi <> io.spi
+    externalInterrupt setWhen(spiCtrl.io.interrupt)
+
     val core = new Area{
       val config = VexRiscvConfig(
         plugins = cpuPlugins += new DebugPlugin(debugClockDomain)
@@ -398,6 +409,8 @@ class MiniBriey(config: BrieyConfig) extends Component{
       slaves = List(
         gpioACtrl.io.apb -> (0x00000, 4 kB),
         uartCtrl.io.apb  -> (0x10000, 4 kB),
+        pwmCtrl.io.apb   -> (0x11000, 4 kB),
+        spiCtrl.io.apb   -> (0x12000, 4 kB),
         timerCtrl.io.apb -> (0x20000, 4 kB)
       )
     )
@@ -447,21 +460,11 @@ object Briey_iCE40_tinyfpga_bx{
       val jtag_tms = in  Bool()
       val uart_txd = out Bool()
       val uart_rxd = in(Analog(Bool))
-/*
       val pwm      = out Bool()
       val spi_sck  = in  Bool()
       val spi_mosi = in  Bool()
       val spi_ss   = in  Bool()
-*/
       val USBPU    = out Bool()
-
-/*
-      val mosi = inout(Analog(Bool))
-      val miso = inout(Analog(Bool))
-      val sclk = out Bool()
-      val spis = out Bool()
-*/
-
       val led = out Bits(8 bits)
     }
     val briey = new MiniBriey(
@@ -505,12 +508,10 @@ object Briey_iCE40_tinyfpga_bx{
     rxdPullup.PACKAGE_PIN := io.uart_rxd
     briey.io.uart.rxd := rxdPullup.D_IN_0
 
-/*
     briey.io.pwm <> io.pwm
     briey.io.spi.sck := io.spi_sck
     briey.io.spi.mosi := io.spi_mosi
     briey.io.spi.ss := io.spi_ss
-*/
 
     /*
      * Please refer
