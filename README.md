@@ -70,13 +70,20 @@ Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexrisc
 
 You can test this by [Python script](scripts/flogics/Murax/iCE40-tinyfpga-bx/scripts/spi_master.py).
 
+### Simple AXI4 Bus Master (DMA)
+
+Also added a very simple [AXI4 Bus Master](src/main/scala/vexriscv/yokoyama/SimpleAxi4Master.scala).
+
+- Using Axi4WriteOnly
+- Autonomously write to memory range 0x8000_0f00 through 0x8000_0fff
+
 ## Notice
 
 - I used nextpnr though the original was using arachne-pnr.
 
 ## Logic cells utilization
 
-### Murax (without PWM, without SPI Slave)
+### Murax (without PWM, without SPI Slave, without Simple AXI4 Bus Master)
 
 Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
