@@ -22,6 +22,7 @@ import spinal.lib.system.debugger.{JtagAxi4SharedDebugger, JtagBridge, SystemDeb
 import spinal.lib.blackbox.lattice.ice40.SB_IO
 import flogics.lib.pwm._
 import flogics.lib.spi._
+import flogics.lib.axi4._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -373,6 +374,8 @@ class MiniBriey(
       }
     }
 
+    val simpleAxi4Master = new SimpleAxi4Master()
+
 
     val axiCrossbar = Axi4CrossbarFactory()
 
@@ -383,7 +386,8 @@ class MiniBriey(
 
     axiCrossbar.addConnections(
       core.iBus       -> List(ram.io.axi),
-      core.dBus       -> List(ram.io.axi, apbBridge.io.axi)
+      core.dBus       -> List(ram.io.axi, apbBridge.io.axi),
+      simpleAxi4Master.io.axi -> List(ram.io.axi)
     )
 
     axiCrossbar.addPipelining(apbBridge.io.axi)((crossbar,bridge) => {
