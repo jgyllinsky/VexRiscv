@@ -137,6 +137,15 @@ Total number of logic levels: 9
 Total path delay: 23.27 ns (42.98 MHz)
 ```
 
+### Mini Briey (with PWM, SPI Slave, Simple AXI4 Bus Master, and SPI ROM XiP)
+
+```bash
+$ icetime -tmd lp8k bin/Briey_iCE40_tinyfpga_bx.asc
+
+Total number of logic levels: 43
+Total path delay: 34.22 ns (29.22 MHz)
+```
+
 ## Floor view
 
 ### Murax (without PWM, without SPI Slave)
