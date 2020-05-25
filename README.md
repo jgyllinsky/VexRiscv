@@ -110,6 +110,22 @@ Info: 	         SB_WARMBOOT:     0/    1     0%
 
 Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
 
+### Mini Briey (with PWM, SPI Slave, Simple AXI4 Bus Master, and SPI ROM XiP)
+
+Output of nextpnr-ice40 (git sha1 dd7f7a5):
+
+```
+Info: Device utilisation:
+Info:            ICESTORM_LC:  4087/ 7680    53%
+Info:           ICESTORM_RAM:    23/   32    71%
+Info:                  SB_IO:    24/  256     9%
+Info:                  SB_GB:     8/    8   100%
+Info:           ICESTORM_PLL:     0/    2     0%
+Info:            SB_WARMBOOT:     0/    1     0%
+```
+
+Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
+
 ## Timing analysis
 
 ### Murax (without PWM, without SPI Slave)
@@ -126,6 +142,10 @@ Total path delay: 23.27 ns (42.98 MHz)
 ### Murax (without PWM, without SPI Slave)
 
 ![floor view](scripts/flogics/Murax/iCE40-tinyfpga-bx/img/floorview.png)
+
+### Mini Briey (with PWM, SPI Slave, Simple AXI4 Bus Master, and SPI ROM XiP)
+
+![floor view](scripts/flogics/Briey/iCE40-tinyfpga-bx/img/floorview.png)
 
 **The following describes the original SpinalHDL/VexRiscv.**
 
