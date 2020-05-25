@@ -66,10 +66,10 @@ set_io --warn-no-port io_led[1] B6
 set_io --warn-no-port io_led[0] A6
 
 # SPI flash interface on bottom of board
-set_io --warn-no-port SPI_SS F7
-set_io --warn-no-port SPI_SCK G7
-set_io --warn-no-port SPI_IO0 G6
-set_io --warn-no-port SPI_IO1 H7
+set_io --warn-no-port io_spirom_ss F7
+set_io --warn-no-port io_spirom_sck G7
+set_io --warn-no-port io_spirom_mosi G6
+set_io --warn-no-port io_spirom_miso H7
 set_io --warn-no-port SPI_IO2 H4
 set_io --warn-no-port SPI_IO3 J8
 

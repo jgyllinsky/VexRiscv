@@ -12,15 +12,12 @@ generate : ${VERILOG}
 
 ${VERILOG}*.bin:
 
-bin/${VNAME}.json : ${VERILOG} ${VERILOG}*.bin
+bin/${VNAME}.json : ${VERILOG}
 	mkdir -p bin
-	rm -f ${VNAME}.v*.bin
-	cp ${VERILOG}*.bin . | true
-	# yosys -v3 -p "synth_ice40 -top ${VNAME} -blif bin/${VNAME}.blif" ${VERILOG}
 	yosys -v3 -p "synth_ice40 -top ${VNAME} -json bin/${VNAME}.json" ${VERILOG}
 
 bin/${VNAME}.asc : ${VNAME}.pcf bin/${VNAME}.json
-	nextpnr-ice40 --pcf ${VNAME}.pcf --lp8k --package cm81 --json bin/${VNAME}.json --asc bin/${VNAME}.asc
+	nextpnr-ice40 --freq 16 --pcf ${VNAME}.pcf --lp8k --package cm81 --json bin/${VNAME}.json --asc bin/${VNAME}.asc --log ${VNAME}_nextpnr.log
 
 bin/${VNAME}.bin : bin/${VNAME}.asc
 	icepack bin/${VNAME}.asc bin/${VNAME}.bin

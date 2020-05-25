@@ -56,13 +56,13 @@ Please find this [PCF file](scripts/flogics/Murax/iCE40-tinyfpga-bx/Murax_iCE40_
 
 ### PWM Output
 
-I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala/vexriscv/yokoyama/PwmCtrl.scala).
+I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala/vexriscv/flogics/PwmCtrl.scala).
 
 Demo software is located [here](https://github.com/yokoyama-flogics/VexRiscvSocSoftware/tree/tinyfpga_bx/projects/murax/yokoyama/src).
 
 ### Simple SPI Slave
 
-Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexriscv/yokoyama/SpiSlave.scala).
+Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexriscv/flogics/SpiSlave.scala).
 
 - without MISO
 - word size: 16 bits
@@ -72,7 +72,7 @@ You can test this by [Python script](scripts/flogics/Murax/iCE40-tinyfpga-bx/scr
 
 ### Simple AXI4 Bus Master (DMA)
 
-Also added a very simple [AXI4 Bus Master](src/main/scala/vexriscv/yokoyama/SimpleAxi4Master.scala).
+Also added a very simple [AXI4 Bus Master](src/main/scala/vexriscv/flogics/SimpleAxi4Master.scala).
 
 - Using Axi4WriteOnly
 - Autonomously write to memory range 0x8000_0f00 through 0x8000_0fff

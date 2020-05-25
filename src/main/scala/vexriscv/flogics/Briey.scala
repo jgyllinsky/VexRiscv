@@ -25,6 +25,8 @@ import flogics.lib.spi._
 import flogics.lib.axi4._
 
 import scala.collection.mutable.ArrayBuffer
+import spinal.lib.com.spi.SpiMaster
+import flogics.lib.axi4.Axi4RomAt25sf081
 
 
 case class BrieyConfig(axiFrequency : HertzNumber,
@@ -160,8 +162,9 @@ object BrieyConfig{
     config
   }
 
-  def flogics = {
-    val config = BrieyConfig(
+  def flogics(): BrieyConfig = flogics(withXip = false)
+  def flogics(withXip: Boolean) =
+    BrieyConfig(
       axiFrequency = 0 MHz, // dummy anymore
       onChipRamSize  = 8 kB,
       sdramLayout = null,
@@ -236,15 +239,14 @@ object BrieyConfig{
         new YamlPlugin("cpu0.yaml")
       )
     )
-    config
-  }
 }
 
 
 
 class MiniBriey(
     config: BrieyConfig,
-    axiClkFreq: HertzNumber
+    axiClkFreq: HertzNumber,
+    withXip: Boolean = false
 ) extends Component{
 
   //Legacy constructor
@@ -273,6 +275,7 @@ class MiniBriey(
     val uart  = master(Uart())
     val pwm   = out Bool
     val spi   = slave(Spi())
+    val spirom = master(SpiMaster())
   }
 
   val resetCtrlClockDomain = ClockDomain(
@@ -283,22 +286,67 @@ class MiniBriey(
   )
 
   val resetCtrl = new ClockingArea(resetCtrlClockDomain) {
-    val systemResetUnbuffered  = False
+    /*
+     * We need to enough time margin for SPI ROM
+     * Reference: Adesto DS-25SF081–045I–8/2017
+     *   11.3 Deep Power-Down (B9h)
+     *   11.4 Resume from Deep Power-Down (ABh)
+     */
+    val timeWait = 10 us
+    val marginBy = 2
+    val cycleWait1 = (timeWait * axiClkFreq).toBigInt
+    val cycleWait2 =
+      (timeWait * 2 * axiClkFreq + (2 * 8 + 2) * marginBy).toBigInt
 
-    //Implement an counter to keep the reset axiResetOrder high 64 cycles
-    // Also this counter will automaticly do a reset when the system boot.
-    val systemResetCounter = Reg(UInt(6 bits)) init(0)
-    when(systemResetCounter =/= U(systemResetCounter.range -> true)){
-      systemResetCounter := systemResetCounter + 1
-      systemResetUnbuffered := True
-    }
-    when(BufferCC(io.asyncReset)){
-      systemResetCounter := 0
+    SpinalInfo("timeWait = " + timeWait.toString)
+    SpinalInfo("cycleWait1 = " + cycleWait1.toString)
+    SpinalInfo("cycleWait2 = " + cycleWait2.toString)
+
+    val reset1 = Reg(Bool) init (True)
+    val reset2a = Reg(Bool) init (True)
+    val reset2b = Reg(Bool) init (True)
+
+    val systemResetCounter = Counter(cycleWait2 + 1)
+
+    when(!systemResetCounter.willOverflowIfInc) {
+      systemResetCounter.increment()
     }
 
-    //Create all reset used later in the design
-    val systemReset  = RegNext(systemResetUnbuffered)
-    val axiReset     = RegNext(systemResetUnbuffered)
+    when(systemResetCounter.value === cycleWait1) {
+      reset1 := False
+    }
+
+    when(systemResetCounter.value === cycleWait2) {
+      reset2a := False
+      reset2b := False
+    }
+
+    when(BufferCC(io.asyncReset)) {
+      systemResetCounter.clear()
+    }
+
+    // Create all reset used later in the design
+    // NOTICE: If generating systemReset and axiReset by single reset register,
+    // gdb (by OpenOCD) fails to halt CPU.  (i.e. monitor reset halt)
+    // I don't know why...  max_fanout problem?  (Should refer nextpnr output
+    // log, etc.)
+    val spiRomReset  = reset1
+    val systemReset  = reset2a
+    val axiReset     = reset2b
+  }
+
+  val spiRomClockDomain = ClockDomain(
+    clock = io.axiClk,
+    reset = resetCtrl.spiRomReset,
+    frequency = FixedFrequency(axiClkFreq)
+  )
+
+  val spiRomArea = new ClockingArea(spiRomClockDomain) {
+    /*
+     * SPI ROM of TinyFPGA BX is 1 MB, but allow different access methods
+     * in twice address range.
+     */
+    val spiRom = new Axi4RomAt25sf081(byteCount = 2 MB)
   }
 
   val axiClockDomain = ClockDomain(
@@ -351,7 +399,10 @@ class MiniBriey(
 
     val core = new Area{
       val config = VexRiscvConfig(
-        plugins = cpuPlugins += new DebugPlugin(debugClockDomain)
+        plugins = cpuPlugins +=
+          new DebugPlugin(
+            debugClockDomain,
+            hardwareBreakpointCount = if (withXip) 3 else 0)
       )
 
       val cpu = new VexRiscv(config)
@@ -375,18 +426,34 @@ class MiniBriey(
     }
 
     val simpleAxi4Master = new SimpleAxi4Master()
+    val spiRom = spiRomArea.spiRom
+    spiRom.io.spi <> io.spirom
 
 
     val axiCrossbar = Axi4CrossbarFactory()
 
+    SpinalInfo("withXip = " + withXip.toString)
     axiCrossbar.addSlaves(
-      ram.io.axi       -> (0x80000000L,   onChipRamSize),
+      ram.io.axi -> (
+        if (withXip)
+          0x90000000L
+        else
+          0x80000000L, onChipRamSize),
+      /*
+       * SPI ROM of TinyFPGA BX is 1 MB, but allow different access methods
+       * in twice address range.
+       */
+      spiRom.io.axi -> (
+        if (withXip)
+          0x80000000L
+        else
+          0x90000000L, 2 MB),
       apbBridge.io.axi -> (0xF0000000L,   1 MB)
     )
 
     axiCrossbar.addConnections(
-      core.iBus       -> List(ram.io.axi),
-      core.dBus       -> List(ram.io.axi, apbBridge.io.axi),
+      core.iBus       -> List(ram.io.axi, spiRom.io.axi),
+      core.dBus       -> List(ram.io.axi, spiRom.io.axi, apbBridge.io.axi),
       simpleAxi4Master.io.axi -> List(ram.io.axi)
     )
 
@@ -437,32 +504,41 @@ object Briey_iCE40_tinyfpga_bx{
     val GLOBAL_BUFFER_OUTPUT = out Bool()
   }
 
-  case class Briey_iCE40_tinyfpga_bx(nClkDiv: Int = 0) extends Component{
+  case class Briey_iCE40_tinyfpga_bx(
+      nClkDiv: Int = 0,
+      withXip: Boolean
+  ) extends Component{
     val io = new Bundle {
-      val mainClk  = in  Bool()
-      val jtag_tck = in  Bool()
-      val jtag_tdi = in  Bool()
+      val mainClk = in Bool()
+      val jtag_tck = in Bool()
+      val jtag_tdi = in Bool()
       val jtag_tdo = out Bool()
-      val jtag_tms = in  Bool()
+      val jtag_tms = in Bool()
       val uart_txd = out Bool()
       val uart_rxd = in(Analog(Bool))
-      val pwm      = out Bool()
-      val spi_sck  = in  Bool()
-      val spi_mosi = in  Bool()
-      val spi_ss   = in  Bool()
-      val USBPU    = out Bool()
+      val pwm = out Bool()
+      val spi_sck = in Bool()
+      val spi_mosi = in Bool()
+      val spi_ss = in Bool()
+      val spirom_sck = out Bool()
+      val spirom_mosi = out Bool()
+      val spirom_miso = in Bool()
+      val spirom_ss = out Bool()
+      val USBPU = out Bool()
       val led = out Bits(8 bits)
     }
     val briey = new MiniBriey(
       BrieyConfig.flogics,
-      axiClkFreq = (16 / (1 << nClkDiv)) MHz
+      axiClkFreq = (16 / (1 << nClkDiv)) MHz,
+      withXip = withXip
     )
-    HexTools.initRam(
-      briey.axi.ram.ram,
-      "src/main/ressource/hex/pwmSpiDemo.hex",
-      // "../VexRiscvSocSoftware/projects/murax/yokoyama/build/demo.hex", // XXX
-      0x80000000l
-    )
+
+    if (!withXip)
+      HexTools.initRam(
+        briey.axi.ram.ram,
+        "src/main/ressource/hex/pwmSpiDemo.hex",
+        0x80000000l
+      )
 
     briey.io.asyncReset := False
 
@@ -520,6 +596,11 @@ object Briey_iCE40_tinyfpga_bx{
     briey.io.spi.mosi := io.spi_mosi
     briey.io.spi.ss := io.spi_ss
 
+    briey.io.spirom.sclk <> io.spirom_sck
+    briey.io.spirom.mosi <> io.spirom_mosi
+    briey.io.spirom.miso <> io.spirom_miso
+    briey.io.spirom.ss.asBool <> io.spirom_ss
+
     /*
      * Please refer
      * https://github.com/tinyfpga/TinyFPGA-BX/blob/master/apio_template/top.v
@@ -530,6 +611,20 @@ object Briey_iCE40_tinyfpga_bx{
   }
 
   def main(args: Array[String]) {
-    SpinalVerilog(Briey_iCE40_tinyfpga_bx(nClkDiv = 0))
+    SpinalVerilog(Briey_iCE40_tinyfpga_bx(nClkDiv = 0, withXip = true))
+  }
+}
+
+object Briey{
+  def main(args: Array[String]) {
+    val config = SpinalConfig()
+    config.generateVerilog({
+      val toplevel = new MiniBriey(
+        BrieyConfig.flogics,
+        axiClkFreq = 16 MHz,
+        withXip = true
+      )
+      toplevel
+    })
   }
 }
