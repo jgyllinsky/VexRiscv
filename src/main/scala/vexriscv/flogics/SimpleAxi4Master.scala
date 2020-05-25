@@ -7,7 +7,7 @@ import spinal.lib.bus.amba3.apb.{Apb3, Apb3SlaveFactory}
 import spinal.lib.bus.amba4.axi.{Axi4Config, Axi4WriteOnly}
 
 class SimpleAxi4Master(
-    addr_begin: Long = 0x80000f00L,
+    addr_begin: Long = 0x90000f00L,
     bits_range: Int = 8
 ) extends Component {
   val io = new Bundle {
@@ -34,7 +34,7 @@ class SimpleAxi4Master(
     )
   }
 
-  SpinalInfo("addr_begin = " + addr_begin.toString)
+  SpinalInfo("addr_begin = 0x" + addr_begin.toHexString)
 
   val addr = Reg(UInt(bits_range bits)) init (0)
   val data = Counter(32 bits)

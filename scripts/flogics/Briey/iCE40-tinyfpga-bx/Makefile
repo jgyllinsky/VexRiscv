@@ -28,10 +28,10 @@ time: bin/${VNAME}.bin
 	icetime -tmd lp8k bin/${VNAME}.asc
 
 prog : bin/${VNAME}.bin
-	tinyprog -p $^
+	tinyprog -p $^ -u demo.bin
 
 sudo-prog : bin/${VNAME}.bin
-	sudo tinyprog -p $^
+	sudo tinyprog -p $^ -u demo.bin
 
 clean :
 	rm -rf bin

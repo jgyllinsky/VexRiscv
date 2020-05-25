@@ -45,6 +45,7 @@ obj_dir
 *.tcl
 *.o
 *.bin
+!scripts/flogics/Briey/iCE40-tinyfpga-bx/demo.bin
 
 simWorkspace/
 tmp/
