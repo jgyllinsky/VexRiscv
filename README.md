@@ -1,12 +1,12 @@
-## VexRiscv Murax (w/o XIP) and Mini-Briey ports for TinyFPGA-BX
+## VexRiscv Murax (w/o XiP) and Mini-Briey (with XiP) ports for TinyFPGA-BX
 
 Original GitHub site is https://github.com/SpinalHDL/VexRiscv .
 
-I have just run Murax SoC _without_ XIP (eXecute-In-Place), and also Mini-Briey (a subset of the original Briey) on [TinyFPGA-BX](https://tinyfpga.com/bx/guide.html).
+I have just run Murax SoC _without_ XiP (eXecute-In-Place), and also Mini-Briey (a subset of the original Briey) on [TinyFPGA-BX](https://tinyfpga.com/bx/guide.html).
 
 Mini-Briey doesn't have SD-RAM interface (SdramCtrl) or VGA (VgaCtrl).
 And also CPU core configuration is as same as Murax.
-(In short, I wanted evaluate AXI4 Crossbar for future experimentation.)
+This Mini-Briey comes with XiP instead.
 
 ![photo](scripts/flogics/Murax/iCE40-tinyfpga-bx/img/photo.jpg)
 
@@ -24,7 +24,7 @@ I'll explain only the difference for TinyFPGA-BX below.
 
 ## Build
 
-### Murax (w/o XIP)
+### Murax (w/o XiP)
 
 First, connect your TinyFPGA to a USB port.
 
@@ -76,6 +76,14 @@ Also added a very simple [AXI4 Bus Master](src/main/scala/vexriscv/flogics/Simpl
 
 - Using Axi4WriteOnly
 - Autonomously write to memory range 0x8000_0f00 through 0x8000_0fff
+
+### Execution-in-Place (XiP) on TinyFPGA BX SPI ROM
+
+Also added a simple [XiP functionality](src/main/scala/vexriscv/flogics/Axi4Rom.scala).
+
+- Working with Adesto AT25SF081.
+- Not using Dual-I/O or Quad-I/O, so it is very slow.
+- Not using DDR (Double Data Rate) of iCE40 SB_IO, so it's slow again.
 
 ## Notice
 
