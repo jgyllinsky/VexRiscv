@@ -82,6 +82,9 @@ Also added a very simple [AXI4 Bus Master](src/main/scala/vexriscv/flogics/Simpl
 Also added a simple [XiP functionality](src/main/scala/vexriscv/flogics/Axi4Rom.scala).
 
 - Working with Adesto AT25SF081.
+- SPI ROM address 0x50000 (user data area of TinyFPGA BX) is mapped from 0x8000_0000.
+- All SPI ROM address range is also mapped from 0x8010_0000 for convenience.
+- Burst access is also supported.  (Should run with cache.)
 - Not using Dual-I/O or Quad-I/O, so it is very slow.
 - Not using DDR (Double Data Rate) of iCE40 SB_IO, so it's slow again.
 
