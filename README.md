@@ -116,7 +116,7 @@ Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
 ```
 Info: Device utilisation:
-Info:            ICESTORM_LC:  4087/ 7680    53%
+Info:            ICESTORM_LC:  4031/ 7680    52%
 Info:           ICESTORM_RAM:    23/   32    71%
 Info:                  SB_IO:    24/  256     9%
 Info:                  SB_GB:     8/    8   100%
