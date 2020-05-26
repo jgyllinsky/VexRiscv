@@ -84,15 +84,17 @@ case class SpiMasterCtrlCmdSet(
    * spiCmd: command byte to SPI ROM
    * addr: address word to SPI ROM
    * withAddr: send address word if true
-   * lenRead: number of bytes to read from SPI ROM
+   * withRead: read data after address xmit if true
+   * lenRead: number of bytes minus 1, to read from SPI ROM (only when withRead)
    *
    * lenRead value (in bytes) can be 256 (max length of AXI4 'len + 1' words)
-   * times 4 (32 / 8), or 1024, so we need 11 bits width to hold 1024.
+   * times 4 (32 / 8) - 1, or 1023, so we need 10 bits width to hold.
    */
   val spiCmd = Bits(g.widthCmd bits)
   val addr = UInt(g.widthAddr bits)
   val withAddr = Bool
-  val lenRead = UInt(log2Up(256 * 4 + 1) bits)
+  val withRead = Bool
+  val lenRead = UInt(log2Up(256 * 4) bits)
 
   override def asMaster(): Unit = {
     out(spiCmd, addr, withAddr)
@@ -148,8 +150,8 @@ class SpiMasterCtrl(
           lenSend := g.widthCmd - 1
           addr := io.cmd.payload.addr
           spiCmd := io.cmd.payload.spiCmd
-          lenRead := io.cmd.payload.lenRead - 1
-          withRead := io.cmd.payload.lenRead =/= 0
+          lenRead := io.cmd.payload.lenRead
+          withRead := io.cmd.payload.withRead
           withAddr := io.cmd.payload.withAddr
           mosi := shiftedBit(io.cmd.payload.spiCmd, g.widthCmd - 1)
           ctBits := g.widthData - 1
@@ -278,6 +280,7 @@ object SpiMasterSim {
       dut.io.cmd.payload.spiCmd #= 0xab
       dut.io.cmd.payload.addr #= 0x123456
       dut.io.cmd.payload.withAddr #= false
+      dut.io.cmd.payload.withRead #= false
       dut.io.cmd.payload.lenRead #= 0
 
       wait(10)
@@ -294,6 +297,7 @@ object SpiMasterSim {
       dut.io.cmd.payload.spiCmd #= 0x03
       dut.io.cmd.payload.addr #= 0x123456
       dut.io.cmd.payload.withAddr #= true
+      dut.io.cmd.payload.withRead #= false
       dut.io.cmd.payload.lenRead #= 0
       dut.io.cmd.valid #= true
       wait(1)
@@ -308,7 +312,8 @@ object SpiMasterSim {
       dut.io.cmd.payload.spiCmd #= 0x03
       dut.io.cmd.payload.addr #= 0x123456
       dut.io.cmd.payload.withAddr #= true
-      dut.io.cmd.payload.lenRead #= 4
+      dut.io.cmd.payload.withRead #= true
+      dut.io.cmd.payload.lenRead #= 4 - 1
       dut.io.cmd.valid #= true
       wait(1)
       dut.io.cmd.valid #= false
@@ -423,6 +428,7 @@ class Axi4RomAt25sf081(
   spiCtrl.io.cmd.valid := False
   spiCtrl.io.cmd.payload.spiCmd := g.cmdReadArray
   spiCtrl.io.cmd.payload.withAddr := True
+  spiCtrl.io.cmd.payload.withRead := True
 
   val fsm = new StateMachine {
     val idle = new State with EntryPoint
@@ -435,7 +441,19 @@ class Axi4RomAt25sf081(
         rLast := False
 
         when(ar.valid) {
-          val lenReadVal = (ar.payload.len + 1) * (32 / g.widthData)
+          /*
+           * The first one requires lesser logic cells (why?) but slower than
+           * the latter.
+           *
+           * val lenReadVal =
+           *   ((ar.payload.len + 1) * (32 / g.widthData) - 1).resize(10)
+           *
+           * val lenReadVal = ((ar.payload.len << 2) | 0x3).resized
+           */
+          val lenReadVal =
+            ((ar.payload.len + 1) * (32 / g.widthData) - 1).resize(10)
+          SpinalInfo("ar.payload.len.getWidth = " + ar.payload.len.getWidth)
+          SpinalInfo("lenReadVal.getWidth = " + lenReadVal.getWidth)
 
           id := ar.payload.id
           addr := calcAddr(ar.payload.addr)
@@ -498,6 +516,7 @@ class Axi4RomAt25sf081(
           spiCtrl.io.cmd.valid := True
           spiCtrl.io.cmd.payload.spiCmd := g.cmdResume
           spiCtrl.io.cmd.payload.withAddr := False
+          spiCtrl.io.cmd.payload.withRead := False
           spiCtrl.io.cmd.payload.lenRead := 0
           goto(sending)
         }
