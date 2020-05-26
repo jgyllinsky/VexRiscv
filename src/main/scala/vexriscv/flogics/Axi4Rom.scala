@@ -79,7 +79,7 @@ class Axi4TestRom() extends Component {
 
 case class SpiMasterCtrlCmdSet(
     g: At25sf081Generics = At25sf081Generics()
-) extends Bundle with IMasterSlave {
+) extends Bundle with {
   /*
    * spiCmd: command byte to SPI ROM
    * addr: address word to SPI ROM
@@ -95,10 +95,6 @@ case class SpiMasterCtrlCmdSet(
   val withAddr = Bool
   val withRead = Bool
   val lenRead = UInt(log2Up(256 * 4) bits)
-
-  override def asMaster(): Unit = {
-    out(spiCmd, addr, withAddr)
-  }
 }
 
 class SpiMasterCtrl(
