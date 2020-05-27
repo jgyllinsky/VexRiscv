@@ -22,9 +22,9 @@ I'll explain only the difference for TinyFPGA-BX below.
 
 2. Also follow [this site](https://github.com/SpinalHDL/VexRiscv) and install required software.
 
-## Build
+## How to Build
 
-### Murax (w/o XiP)
+### Murax SoC (w/o XiP) for TinyFPGA BX.
 
 First, connect your TinyFPGA to a USB port.
 
@@ -36,7 +36,7 @@ $ make prog
 Done.
 JTAG functionality also works.
 
-### Mini-Briey
+### Mini-Briey SoC (with XiP) for TinyFPGA BX.
 
 First, connect your TinyFPGA to a USB port.
 
@@ -46,19 +46,37 @@ $ make prog
 ```
 
 Done.
-JTAG functionality also works
+JTAG functionality also works.
+
+## Simulation
+
+### Mini-Briey SoC (with XiP)
+
+To disable .vcd (wave file) generation, specify ```TRACE=no``` instead.
+
+```bash
+$ cd VexRiscv/src/test/cpp/flogics/briey
+$ make clean run TRACE=yes
+Ctrl-C
+
+$ gtkwave Briey.vcd
+```
+
+Please note that .vcd file size will become huge very quickly.
+You can stop by Ctrl-C.
 
 ## Pin Assignments
 
 Please find this [PCF file](scripts/flogics/Murax/iCE40-tinyfpga-bx/Murax_iCE40_tinyfpga_bx.pcf).
 
-## Bonus
+## Bonuses
+
+Demo software to evaluate bonuses below is located [here](https://github.com/yokoyama-flogics/VexRiscvSocSoftware/tree/tinyfpga_bx/projects/murax/flogics/src).
+Please refer [VexRiscvSocSoftware for modified Murax and Mini-Briey](https://github.com/yokoyama-flogics/VexRiscvSocSoftware).
 
 ### PWM Output
 
 I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala/vexriscv/flogics/PwmCtrl.scala).
-
-Demo software is located [here](https://github.com/yokoyama-flogics/VexRiscvSocSoftware/tree/tinyfpga_bx/projects/murax/yokoyama/src).
 
 ### Simple SPI Slave
 
