@@ -1,4 +1,4 @@
-## VexRiscv Murax (w/o XiP) and Mini-Briey (with XiP) ports for TinyFPGA-BX
+# VexRiscv Murax (w/o XiP) and Mini-Briey (with XiP) ports for TinyFPGA-BX
 
 Original GitHub site is https://github.com/SpinalHDL/VexRiscv .
 
@@ -55,7 +55,7 @@ JTAG functionality also works.
 To disable .vcd (wave file) generation, specify ```TRACE=no``` instead.
 
 ```bash
-$ cd VexRiscv/src/test/cpp/flogics/briey
+$ cd src/test/cpp/flogics/briey
 $ make clean run TRACE=yes
 Ctrl-C
 
@@ -71,7 +71,7 @@ Please find this [PCF file](scripts/flogics/Murax/iCE40-tinyfpga-bx/Murax_iCE40_
 
 ## Bonuses
 
-Demo software to evaluate bonuses below is located [here](https://github.com/yokoyama-flogics/VexRiscvSocSoftware/tree/tinyfpga_bx/projects/murax/flogics/src).
+Demo software to evaluate bonuses below is located [here](https://github.com/yokoyama-flogics/VexRiscvSocSoftware/tree/tinyfpga_bx/projects/flogics/murax/src).
 Please refer [VexRiscvSocSoftware for modified Murax and Mini-Briey](https://github.com/yokoyama-flogics/VexRiscvSocSoftware).
 
 ### PWM Output
@@ -88,14 +88,14 @@ Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexrisc
 
 You can test this by [Python script](scripts/flogics/Murax/iCE40-tinyfpga-bx/scripts/spi_master.py).
 
-### Simple AXI4 Bus Master (DMA)
+### Simple AXI4 Bus Master (DMA) (Mini-Briey only)
 
 Also added a very simple [AXI4 Bus Master](src/main/scala/vexriscv/flogics/SimpleAxi4Master.scala).
 
 - Using Axi4WriteOnly
 - Autonomously write to memory range 0x8000_0f00 through 0x8000_0fff
 
-### Execution-in-Place (XiP) on TinyFPGA BX SPI ROM
+### Execution-in-Place (XiP) on TinyFPGA BX SPI ROM  (Mini-Briey only)
 
 Also added a simple [XiP functionality](src/main/scala/vexriscv/flogics/Axi4Rom.scala).
 
