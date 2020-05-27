@@ -112,7 +112,7 @@ Also added a simple [XiP functionality](src/main/scala/vexriscv/flogics/Axi4Rom.
 
 ## Logic cells utilization
 
-### Murax (without PWM, without SPI Slave, without Simple AXI4 Bus Master)
+### Murax (without PWM, without SPI Slave)
 
 Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
