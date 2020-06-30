@@ -80,8 +80,8 @@ I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala
 
 ### Simple SPI Peripheral
 
-> COPI: Controller Output Peripheral Input
-> CIPO: Controller Input Peripheral Output
+> - COPI: Controller Output Peripheral Input
+> - CIPO: Controller Input Peripheral Output
 
 Also added a very simple [SPI Peripheral receiver (COPI only)](src/main/scala/vexriscv/flogics/SpiSlave.scala).
 
