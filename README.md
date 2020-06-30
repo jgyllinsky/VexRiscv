@@ -78,11 +78,14 @@ Please refer [VexRiscvSocSoftware for modified Murax and Mini-Briey](https://git
 
 I added a very simple PWM output functionality in [PwmCtrl.scala](src/main/scala/vexriscv/flogics/PwmCtrl.scala).
 
-### Simple SPI Slave
+### Simple SPI Peripheral
 
-Also added a very simple [SPI Slave receiver (MOSI only)](src/main/scala/vexriscv/flogics/SpiSlave.scala).
+> COPI: Controller Output Peripheral Input
+> CIPO: Controller Input Peripheral Output
 
-- without MISO
+Also added a very simple [SPI Peripheral receiver (COPI only)](src/main/scala/vexriscv/flogics/SpiSlave.scala).
+
+- without CIPO
 - word size: 16 bits
 - SPI Mode: 1 (CPOL = 0, CPHA = 1)
 
@@ -112,7 +115,7 @@ Also added a simple [XiP functionality](src/main/scala/vexriscv/flogics/Axi4Rom.
 
 ## Logic cells utilization
 
-### Murax (without PWM, without SPI Slave)
+### Murax (without PWM, without SPI Peripheral)
 
 Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
@@ -128,7 +131,7 @@ Info: 	         SB_WARMBOOT:     0/    1     0%
 
 Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
 
-### Mini Briey (with PWM, SPI Slave, Simple AXI4 Bus Master, and SPI ROM XiP)
+### Mini Briey (with PWM, SPI Peripheral, Simple AXI4 Bus Master, and SPI ROM XiP)
 
 Output of nextpnr-ice40 (git sha1 dd7f7a5):
 
@@ -146,7 +149,7 @@ Used Yosys 0.9+932 (git sha1 a73f965, clang 3.8.0-2ubuntu4 -fPIC -Os) .
 
 ## Timing analysis
 
-### Murax (without PWM, without SPI Slave)
+### Murax (without PWM, without SPI Peripheral)
 
 ```bash
 $ icetime -tmd lp8k bin/Murax_iCE40_tinyfpga_bx.asc
@@ -155,7 +158,7 @@ Total number of logic levels: 9
 Total path delay: 23.27 ns (42.98 MHz)
 ```
 
-### Mini Briey (with PWM, SPI Slave, Simple AXI4 Bus Master, and SPI ROM XiP)
+### Mini Briey (with PWM, SPI Peripheral, Simple AXI4 Bus Master, and SPI ROM XiP)
 
 ```bash
 $ icetime -tmd lp8k bin/Briey_iCE40_tinyfpga_bx.asc
@@ -166,11 +169,11 @@ Total path delay: 34.22 ns (29.22 MHz)
 
 ## Floor view
 
-### Murax (without PWM, without SPI Slave)
+### Murax (without PWM, without SPI Peripheral)
 
 ![floor view](scripts/flogics/Murax/iCE40-tinyfpga-bx/img/floorview.png)
 
-### Mini Briey (with PWM, SPI Slave, Simple AXI4 Bus Master, and SPI ROM XiP)
+### Mini Briey (with PWM, SPI Peripheral, Simple AXI4 Bus Master, and SPI ROM XiP)
 
 ![floor view](scripts/flogics/Briey/iCE40-tinyfpga-bx/img/floorview.png)
 
